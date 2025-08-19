@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Gestão Unificado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-main text-base">
+
+    <!-- Mobile Nav Container -->
+    <div id="mobile-nav-container" class="fixed inset-0 z-40 sm:hidden flex justify-end" style="visibility: hidden;">
+        <div id="mobile-nav-backdrop" class="absolute inset-0 bg-black bg-opacity-60 transition-opacity opacity-0"></div>
+        <div id="mobile-nav-panel" class="relative flex flex-col w-64 max-w-[80%] h-full bg-card shadow-2xl transition-transform duration-300 ease-in-out transform translate-x-full">
+            <div class="flex items-center justify-between p-4 border-b border-main">
+                <h2 class="text-lg font-semibold text-primary">Menu</h2>
+                <button id="mobile-nav-close-button" class="p-1 rounded-full text-muted hover:bg-interactive hover:text-white">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <nav class="flex-grow p-2">
+                <button class="mobile-tab-button w-full flex items-center gap-3 text-left px-3 py-2 rounded-md text-base font-medium" data-tab="overview">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10v11h6v-7h6v7h6V10L12 3 3 10z"></path></svg>
+                    <span>Visão Geral</span>
+                </button>
+                <button class="mobile-tab-button w-full flex items-center gap-3 text-left px-3 py-2 rounded-md text-base font-medium" data-tab="schedules">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>Agendamentos</span>
+                </button>
+                <button class="mobile-tab-button w-full flex items-center gap-3 text-left px-3 py-2 rounded-md text-base font-medium" data-tab="finance">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                    <span>Financeiro</span>
+                </button>
+                <button class="mobile-tab-button w-full flex items-center gap-3 text-left px-3 py-2 rounded-md text-base font-medium" data-tab="employees">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <span>Funcionários</span>
+                </button>
+                <button class="mobile-tab-button w-full flex items-center gap-3 text-left px-3 py-2 rounded-md text-base font-medium" data-tab="settings">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span>Configurações</span>
+                </button>
+                <!-- O botão de Customização foi removido daqui -->
+            </nav>
+        </div>
+    </div>
+
+    <!-- Tela de Login -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4 bg-main">
+        <div class="bg-card p-8 rounded-lg shadow-2xl w-full max-w-sm scale-in">
+            <h2 class="text-2xl font-bold text-center text-primary mb-6">Acesso Restrito</h2>
+            <form id="login-form">
+                <div class="mb-4"><label for="username" class="block mb-2 text-sm font-medium">Email</label><input type="email" id="username" class="bg-interactive border border-main rounded-md p-2 w-full text-white" required></div>
+                <div class="mb-6"><label for="password" class="block mb-2 text-sm font-medium">Senha</label><input type="password" id="password" class="bg-interactive border border-main rounded-md p-2 w-full text-white" required></div>
+                <button type="submit" id="login-button" class="w-full bg-primary bg-primary-hover text-primary-contrast font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105">Entrar</button>
+                <p id="login-error" class="text-red-500 text-sm mt-4 text-center h-4"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal do Dashboard -->
+    <div id="main-content" class="hidden p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+        <header class="flex justify-between items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-primary">Painel de Gestão</h1>
+                <p id="last-updated" class="text-xs text-muted mt-1 h-4"></p>
+            </div>
+            <img src="https://i.postimg.cc/65QxYYT8/logo.png" alt="Logo" class="hidden sm:block h-12 w-auto rounded-lg">
+            <button id="mobile-menu-button" class="sm:hidden p-2 rounded-md text-muted hover:text-white hover:bg-interactive focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
+        </header>
+
+        <div class="mb-8">
+            <div class="hidden sm:block">
+                <div class="border-b border-main">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button class="tab-button py-4 px-1 border-b-2 font-medium text-sm transition-all" data-tab="overview">Visão Geral</button>
+                        <button class="tab-button py-4 px-1 border-b-2 font-medium text-sm transition-all" data-tab="schedules">Agendamentos</button>
+                        <button class="tab-button py-4 px-1 border-b-2 font-medium text-sm transition-all" data-tab="finance">Financeiro</button>
+                        <button class="tab-button py-4 px-1 border-b-2 font-medium text-sm transition-all" data-tab="employees">Funcionários</button>
+                        <button class="tab-button py-4 px-1 border-b-2 font-medium text-sm transition-all" data-tab="settings">Configurações</button>
+                        <!-- O botão de Customização foi removido daqui -->
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-content-wrapper" class="relative">
+            <div id="overview-tab" class="tab-content"></div>
+            <div id="schedules-tab" class="tab-content"></div>
+            <div id="finance-tab" class="tab-content"></div>
+            <div id="employees-tab" class="tab-content"></div>
+            <div id="settings-tab" class="tab-content"></div>
+            <!-- O contêiner da aba de Customização foi removido daqui -->
+        </div>
+    </div>
+
+    <!-- Popup Container -->
+    <div id="popup-container"></div>
+
+    <!-- Modais de Confirmação -->
+    <div id="edit-appointment-modal" class="popup-backdrop">
+        <div class="popup-content bg-card rounded-lg shadow-xl w-full max-w-2xl p-6">
+            <h3 class="text-xl font-semibold mb-4 text-primary">Editar Agendamento</h3>
+            <form id="edit-appointment-form">
+                <input type="hidden" id="edit-appointment-id">
+                <input type="hidden" id="edit-appointment-timestamp">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="text-sm">Nome Cliente</label><input type="text" id="edit-appointment-nome" class="bg-interactive border border-main rounded-md p-2 w-full text-white mt-1"></div>
+                    <div><label class="text-sm">Telefone</label><input type="text" id="edit-appointment-telefone" class="bg-interactive border border-main rounded-md p-2 w-full text-white mt-1"></div>
+                    <div><label class="text-sm">Data</label><div id="edit-appointment-data-wrapper" class="mt-1"></div></div>
+                    <div><label class="text-sm">Hora</label><div id="edit-appointment-hora-wrapper" class="mt-1"></div></div>
+                    <div><label class="text-sm">Serviço</label><input type="text" id="edit-appointment-servico" class="bg-interactive border border-main rounded-md p-2 w-full text-white mt-1"></div>
+                    <div><label class="text-sm">Preço (R$)</label><input type="text" id="edit-appointment-preco" class="bg-interactive border border-main rounded-md p-2 w-full text-white mt-1"></div>
+                    <div class="md:col-span-2"><label class="text-sm">Profissional</label><div id="edit-appointment-professional-wrapper" class="mt-1"></div></div>
+                </div>
+                <div class="flex flex-col sm:flex-row justify-end gap-4 mt-6">
+                    <button type="button" id="cancel-edit-appointment" class="bg-interactive hover:bg-interactive-hover text-white font-bold py-2 px-4 rounded-lg transition-all">Cancelar</button>
+                    <button type="submit" id="save-edit-appointment" class="bg-success hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg transition-all">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="delete-confirm-modal" class="popup-backdrop">
+        <div class="popup-content bg-card rounded-lg shadow-xl w-full max-w-md p-6 text-center">
+            <h3 class="text-xl font-semibold mb-4">Confirmar Exclusão</h3>
+            <p class="text-muted mb-6">Tem certeza que deseja excluir? Esta ação não pode ser desfeita.</p>
+            <input type="hidden" id="delete-item-id">
+            <input type="hidden" id="delete-table-name">
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button type="button" id="cancel-delete" class="bg-interactive hover:bg-interactive-hover text-white font-bold py-2 px-6 rounded-lg transition-all">Cancelar</button>
+                <button type="button" id="confirm-delete" class="bg-danger hover:opacity-90 text-white font-bold py-2 px-6 rounded-lg transition-all">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+<script type="module" src="js/main.js" defer></script>
+
+</body>
+</html>
